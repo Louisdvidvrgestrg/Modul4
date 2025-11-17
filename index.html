@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katalog Buku Digital</title>
+    <meta name="description" content="Aplikasi katalog buku digital PWA">
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --secondary-color: #f3f4f6;
+            --text-color: #1f2937;
+            --light-text: #6b7280;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 1rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+
+        nav a {
+            color: var(--white);
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        nav a:hover, nav a.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        main {
+            padding: 2rem 0;
+            min-height: calc(100vh - 140px);
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .page-title {
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .book-card {
+            background-color: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .book-cover {
+            height: 200px;
+            background-color: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .book-info {
+            padding: 1rem;
+        }
+
+        .book-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .book-author {
+            color: var(--light-text);
+            font-size: 0.9rem;
+        }
+
+        .category-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 2rem;
+        }
+
+        .category-card {
+            background-color: var(--white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .category-card:hover {
+            background-color: #eef2ff;
+        }
+
+        .category-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-card {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 2rem;
+            margin-right: 1.5rem;
+        }
+
+        .profile-info h2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-details {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 1.5rem;
+        }
+
+        .detail-item {
+            margin-bottom: 1rem;
+            display: flex;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            width: 120px;
+        }
+
+        footer {
+            background-color: var(--text-color);
+            color: var(--white);
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .install-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .developer-info {
+            background-color: var(--white);
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            text-align: center;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .developer-name {
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .developer-nim {
+            color: var(--light-text);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            nav ul {
+                gap: 10px;
+            }
+            
+            .book-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-avatar {
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span>📚</span> Katalog Buku Digital
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#" class="nav-link active" data-page="home">Beranda</a></li>
+                        <li><a href="#" class="nav-link" data-page="categories">Kategori</a></li>
+                        <li><a href="#" class="nav-link" data-page="profile">Profil</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Info Developer di Setiap Halaman -->
+        <div class="developer-info">
+            <div class="developer-name">Louis David Verges Tarigan</div>
+            <div class="developer-nim">NIM: 21120122140154</div>
+        </div>
+
+        <section id="home" class="page active">
+            <h1 class="page-title">Koleksi Buku Terbaru</h1>
+            <div class="book-grid">
+                <div class="book-card">
+                    <div class="book-cover">📖</div>
+                    <div class="book-info">
+                        <div class="book-title">Laut Bercerita</div>
+                        <div class="book-author">Leila S. Chudori</div>
+                    </div>
+                </div>
+                <div class="book-card">
+                    <div class="book-cover">📖</div>
+                    <div class="book-info">
+                        <div class="book-title">Bumi Manusia</div>
+                        <div class="book-author">Pramoedya Ananta Toer</div>
+                    </div>
+                </div>
+                <div class="book-card">
+                    <div class="book-cover">📖</div>
+                    <div class="book-info">
+                        <div class="book-title">Negeri 5 Menara</div>
+                        <div class="book-author">Ahmad Fuadi</div>
+                    </div>
+                </div>
+                <div class="book-card">
+                    <div class="book-cover">📖</div>
+                    <div class="book-info">
+                        <div class="book-title">Pulang</div>
+                        <div class="book-author">Tere Liye</div>
+                    </div>
+                </div>
+                <div class="book-card">
+                    <div class="book-cover">📖</div>
+                    <div class="book-info">
+                        <div class="book-title">Ronggeng Dukuh Paruk</div>
+                        <div class="book-author">Ahmad Tohari</div>
+                    </div>
+                </div>
+                <div class="book-card">
+                    <div class="book-cover">📖</div>
+                    <div class="book-info">
+                        <div class="book-title">Perahu Kertas</div>
+                        <div class="book-author">Dee Lestari</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="categories" class="page">
+            <h1 class="page-title">Kategori Buku</h1>
+            <div class="category-list">
+                <div class="category-card">
+                    <div class="category-icon">📚</div>
+                    <h3>Fiksi</h3>
+                    <p>15 buku</p>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">🔬</div>
+                    <h3>Sains</h3>
+                    <p>12 buku</p>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">📜</div>
+                    <h3>Sejarah</h3>
+                    <p>8 buku</p>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">💼</div>
+                    <h3>Bisnis</h3>
+                    <p>10 buku</p>
+                </div>
+            </div>
+            
+            <h2 class="page-title">Buku Fiksi</h2>
+            <div class="book-grid">
+                <div class="book-card">
+                    <div class="book-cover">📖</div>
+                    <div class="book-info">
+                        <div class="book-title">Laskar Pelangi</div>
+                        <div class="book-author">Andrea Hirata</div>
+                    </div>
+                </div>
+                <div class="book-card">
+                    <div class="book-cover">📖</div>
+                    <div class="book-info">
+                        <div class="book-title">Sang Pemimpi</div>
+                        <div class="book-author">Andrea Hirata</div>
+                    </div>
+                </div>
+                <div class="book-card">
+                    <div class="book-cover">📖</div>
+                    <div class="book-info">
+                        <div class="book-title">Ayat-Ayat Cinta</div>
+                        <div class="book-author">Habiburrahman El Shirazy</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="profile" class="page">
+            <h1 class="page-title">Profil Pengembang</h1>
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar">LV</div>
+                    <div class="profile-info">
+                        <h2>Louis David Verges Tarigan</h2>
+                        <p>Pengembang Web & PWA</p>
+                    </div>
+                </div>
+                <div class="profile-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Nama:</div>
+                        <div>Louis David Verges Tarigan</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">NIM:</div>
+                        <div>21120122140154</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Kelompok:</div>
+                        <div>PWA-01</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Mata Kuliah:</div>
+                        <div>Pemrograman Web Progressive</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Universitas:</div>
+                        <div>Universitas Diponegoro</div>
+                    </div>
+                </div>
+            </div>
+            <button id="installBtn" class="install-btn" style="display: none;">
+                📲 Install Aplikasi
+            </button>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Katalog Buku Digital - Aplikasi PWA</p>
+            <p>Dikembangkan oleh: Louis David Verges Tarigan - 21120122140154</p>
+        </div>
+    </footer>
+
+    <script>
+        // Navigasi antar halaman
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const pages = document.querySelectorAll('.page');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Hapus kelas active dari semua link dan halaman
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    pages.forEach(page => page.classList.remove('active'));
+                    
+                    // Tambah kelas active ke link yang diklik
+                    this.classList.add('active');
+                    
+                    // Tampilkan halaman yang sesuai
+                    const pageId = this.getAttribute('data-page');
+                    document.getElementById(pageId).classList.add('active');
+                });
+            });
+            
+            // PWA Installation
+            let deferredPrompt;
+            const installBtn = document.getElementById('installBtn');
+            
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                installBtn.style.display = 'inline-flex';
+            });
+            
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        installBtn.style.display = 'none';
+                    }
+                    deferredPrompt = null;
+                }
+            });
+            
+            window.addEventListener('appinstalled', () => {
+                installBtn.style.display = 'none';
+                deferredPrompt = null;
+            });
+        });
+    </script>
+</body>
+</html>
